@@ -19,9 +19,9 @@ function createWindow() {
    * Initial window options
    */
   mainWindow = new BrowserWindow({
-    height: 563,
+    height: 400,
     useContentSize: true,
-    width: 1000,
+    width: 600,
     webPreferences: {
       webSecurity: false,
     },
@@ -32,7 +32,7 @@ function createWindow() {
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
-  const _ipc = new IpcMgr(ipcMain, mainWindow.webContents)
+  new IpcMgr(ipcMain, mainWindow.webContents)
 }
 
 

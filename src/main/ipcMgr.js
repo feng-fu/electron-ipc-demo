@@ -35,13 +35,6 @@ export default class Ipc {
       data,
     })
   }
-
-  sendToCrawler(type, data) {
-    this._sendMsg(CRAWLER_NORMAL_MSG, {
-      type,
-      data,
-    })
-  }
 }
 
 

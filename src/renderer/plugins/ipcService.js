@@ -19,7 +19,11 @@ ipcService.install = Vue => {
         type,
         callback,
       })
-    }
+    },
+    detach: type => {
+      const idx = callbackCache.findIndex(v => v.type === type)
+      idx > -1 ? callbackCache.splice(idx, 1) : console.error(`error type ${type}`)
+    },
   }
   ipcRenderer.on(CRAWLER_NORMAL_MSG, (sender, msg) => {
     callbackCache.forEach(cache => {
