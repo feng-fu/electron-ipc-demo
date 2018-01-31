@@ -1,5 +1,5 @@
 import { app, BrowserWindow, ipcMain } from 'electron' // eslint-disable-line
-// import IpcMgr from './ipcMgr'
+import IpcMgr from './ipcMgr'
 
 /**
  * Set `__static` path to static files in production
@@ -32,10 +32,7 @@ function createWindow() {
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
-  const e = () => {
-    mainWindow.webContents.send('msg')
-  }
-  setInterval(e, 1000)
+  const _ipc = new IpcMgr(ipcMain, mainWindow.webContents)
 }
 
 
@@ -52,13 +49,6 @@ app.on('activate', () => {
     createWindow();
   }
 });
-let time = 0
-
-ipcMain.on('msg', () => {
-  console.log('------event msg received', time++)
-})
-
-
 
 /**
  * Auto Updater

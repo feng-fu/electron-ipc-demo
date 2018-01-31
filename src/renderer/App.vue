@@ -15,11 +15,13 @@
   .large-instance {
     height: 20px;
   }
+  .clickable {
+    cursor: pointer;
+  }
 </style>
 
 <template>
   <div class="container">
-
     <el-menu :default-active="activeCategory" class="el-menu-demo" mode="horizontal" @select="handleSelect">
     <el-menu-item index="5562b415e4b00c57d9b94ac8">前端</el-menu-item>
     <el-menu-item index="5562b410e4b00c57d9b94a92">Android</el-menu-item>
@@ -31,14 +33,13 @@
   </el-menu>
   <div class="large-instance"></div>
   <el-row>
-    <div v-for="o in list" :key="o.objectId" @click="openUrl(o.originalUrl)">
+    <div v-for="o in list" :key="o.objectId" class="clickable" @click="openUrl(o.originalUrl)">
     <el-card class="box-card" >
         <div slot="header" class="clearfix">
           {{o.tags.map(v => v.title).join(' /')}}&nbsp;&nbsp;
           <i class="el-icon-time"></i>
           {{o.createdAt | _formatTime}}&nbsp;&nbsp;&nbsp;
-          <i class="el-icon-edit"></i>
-          {{o.user.username}}
+          <i class="el-icon-edit"></i>&nbsp;&nbsp;{{o.user.username}}
         </div>
       <div class="text blod">
         {{ o.title }} <br />
@@ -71,27 +72,29 @@
       }
     },
     mounted() {
-      this.getData()
+      this.startRequest()
+      this.onRequestBack()
     },
     methods: {
-      handleSelect(key, keyPath) {
-        console.log(key, keyPath)
-        this.activeCategory = key
-        this.getData()
+      onRequestBack() {
+        this.$ipcRenderer.on('request-back', data => {
+          if(data && data.success) {
+            this.list = data.rows
+          } else {
+            this.list = []
+            console.log('get data error.', data.error)
+          }
+        })
       },
-      getData() {
-        axios.get(`https://timeline-merger-ms.juejin.im/v1/get_entry_by_rank?src=web&limit=20&category=${this.activeCategory}`)
-          .then(r => {
-            if(r.status === 200) {
-              this.list = r.data.d.entrylist
-            }
-          })
-          .catch(e => {
-            console.log(e)
-          })
+      handleSelect(key, keyPath) {
+        this.activeCategory = key
+        this.startRequest()
+      },
+      startRequest() {
+        this.$ipcRenderer.send('start-request', this.activeCategory)
       },
       openUrl(url) {
-        window.open(url)
+        this.$ipcRenderer.send('open-shell', url)
       },
     }
   }

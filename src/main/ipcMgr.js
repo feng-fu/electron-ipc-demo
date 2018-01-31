@@ -2,30 +2,35 @@ const {
   CLIENT_NORMAL_MSG,
   CRAWLER_NORMAL_MSG,
 } = require('../constants/constants')
+import ipcMsgHandler from './ipcMsgHandler'
 
-
-module.exports = class Ipc {
+export default class Ipc {
   constructor(listener, sender) {
     this.listener = listener
     this.sender = sender
-    this.addListener(CLIENT_NORMAL_MSG, this.normalHandle.bind(this))
-    this.addListener(CRAWLER_NORMAL_MSG, this.normalHandle.bind(this))
+    this.addListener(CLIENT_NORMAL_MSG, this.handleFn.bind(this))
+    this.handlerList = ipcMsgHandler(this)
   }
 
-  normalHandle() {
-    console.log('event')
+  handleFn(event, data) {
+    try {
+      this.handlerList[data.type](event, data.data)
+    } catch (error) {
+      console.error('handler event error:' + error.message)
+    }
   }
 
   addListener(chanel, cb) {
     this.listener.on(chanel, cb)
   }
 
+
   _sendMsg(chanel, msgBody) {
     this.sender.send(chanel, msgBody)
   }
 
   sendToClient(type, data) {
-    this._sendMsg(CLIENT_NORMAL_MSG, {
+    this._sendMsg(CRAWLER_NORMAL_MSG, {
       type,
       data,
     })
@@ -38,5 +43,6 @@ module.exports = class Ipc {
     })
   }
 }
+
 
 

@@ -4,52 +4,29 @@ const {
   CRAWLER_NORMAL_MSG,
 } = require('./../../constants/constants')
 const ipcService = Object.create(null)
-const callbackCache = {
-  client: [],
-  crawler: [],
-}
+const callbackCache = []
 
-const rendererFactory = (channel, platform) => ({
-  send: (msgType, msgData) => {
-    console.log(`send ${channel}`)
-    ipcRenderer.send(channel, {
-      type: msgType,
-      data: msgData,
+ipcService.install = Vue => {
+  Vue.prototype.$ipcRenderer = {
+    send: (msgType, msgData) => {
+      ipcRenderer.send(CLIENT_NORMAL_MSG, {
+        type: msgType,
+        data: msgData,
+      })
+    },
+    on: (type, callback) => {
+      callbackCache.push({
+        type,
+        callback,
+      })
+    }
+  }
+  ipcRenderer.on(CRAWLER_NORMAL_MSG, (sender, msg) => {
+    callbackCache.forEach(cache => {
+      if (cache.type === msg.type) {
+        cache.callback && cache.callback(msg.data)
+      }
     })
-  },
-  on: (type, callback) => {
-    callbackCache[platform].push({
-      type,
-      callback,
-    })
-  },
-  sendSync: (type, data) => ipcRenderer.sendSync(channel, {
-    type,
-    data,
-  }),
-  detach: (type, cb) => {
-    const index = callbackCache[platform].findIndex(v => v.type === type)
-    index !== -1 ? callbackCache[platform].splice(index, 1) : (cb && cb(new Error(`event type ${type} not exist!`)))
-  },
-})
-
-// const eventHandlerContainer = platform => ((event, msg) => {
-//   Object.values(callbackCache[platform]).forEach((cache) => {
-//     if (cache.type === msg.type) {
-//       cache.callback && cache.callback(event, msg.data)
-//       console.log(`receive msg type : ${cache.type}, msg handler ${cache.callback}`)
-//     }
-//   })
-// })
-ipcService.install = (Vue) => {
-  Vue.prototype.$clientIpcRenderer = rendererFactory(CLIENT_NORMAL_MSG, 'crawler')
-  Vue.prototype.$crawlerIpcRenderer = rendererFactory(CRAWLER_NORMAL_MSG, 'client')
-
-  ipcRenderer.on(CLIENT_NORMAL_MSG, () => {
-    console.log(1111)
-  })
-  ipcRenderer.on(CRAWLER_NORMAL_MSG, () => {
-    console.log(222)
   })
 }
 
