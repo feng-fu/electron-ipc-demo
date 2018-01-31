@@ -11,13 +11,14 @@ const callbackCache = {
 
 const rendererFactory = (channel, platform) => ({
   send: (msgType, msgData) => {
+    console.log(`send ${channel}`)
     ipcRenderer.send(channel, {
       type: msgType,
       data: msgData,
     })
   },
   on: (type, callback) => {
-    callbackCache.push({
+    callbackCache[platform].push({
       type,
       callback,
     })
@@ -32,21 +33,24 @@ const rendererFactory = (channel, platform) => ({
   },
 })
 
-const eventHandlerContainer = platform => ((event, msg) => {
-  Object.values(callbackCache[platform]).forEach((cache) => {
-    if (cache.type === msg.type) {
-      cache.callback && cache.callback(event, msg.data)
-      console.log(`receive msg type : ${cache.type}, msg handler ${cache.callback}`)
-    }
-  })
-})
-
+// const eventHandlerContainer = platform => ((event, msg) => {
+//   Object.values(callbackCache[platform]).forEach((cache) => {
+//     if (cache.type === msg.type) {
+//       cache.callback && cache.callback(event, msg.data)
+//       console.log(`receive msg type : ${cache.type}, msg handler ${cache.callback}`)
+//     }
+//   })
+// })
 ipcService.install = (Vue) => {
   Vue.prototype.$clientIpcRenderer = rendererFactory(CLIENT_NORMAL_MSG, 'crawler')
   Vue.prototype.$crawlerIpcRenderer = rendererFactory(CRAWLER_NORMAL_MSG, 'client')
 
-  ipcRenderer.on(CLIENT_NORMAL_MSG, eventHandlerContainer('client'))
-  ipcRenderer.on(CRAWLER_NORMAL_MSG, eventHandlerContainer('crawler'))
+  ipcRenderer.on(CLIENT_NORMAL_MSG, () => {
+    console.log(1111)
+  })
+  ipcRenderer.on(CRAWLER_NORMAL_MSG, () => {
+    console.log(222)
+  })
 }
 
 export default ipcService

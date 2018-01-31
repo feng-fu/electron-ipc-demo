@@ -24,9 +24,10 @@ module.exports = {
     'import/newline-after-import': 0,
     'no-multi-assign': 0,
     'semi': 0,
-    'no-console': 0,
     'no-unused-expressions': 0,
+    'arrow-parens': 0,
     // allow debugger during development
+    'no-console': process.env.NODE_ENV === 'production' ? 2 : 0,
     'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 0
   }
 }

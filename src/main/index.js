@@ -1,4 +1,5 @@
-import { app, BrowserWindow } from 'electron' // eslint-disable-line
+import { app, BrowserWindow, ipcMain } from 'electron' // eslint-disable-line
+// import IpcMgr from './ipcMgr'
 
 /**
  * Set `__static` path to static files in production
@@ -21,6 +22,9 @@ function createWindow() {
     height: 563,
     useContentSize: true,
     width: 1000,
+    webPreferences: {
+      webSecurity: false,
+    },
   });
 
   mainWindow.loadURL(winURL);
@@ -28,7 +32,12 @@ function createWindow() {
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
+  const e = () => {
+    mainWindow.webContents.send('msg')
+  }
+  setInterval(e, 1000)
 }
+
 
 app.on('ready', createWindow);
 
@@ -43,6 +52,13 @@ app.on('activate', () => {
     createWindow();
   }
 });
+let time = 0
+
+ipcMain.on('msg', () => {
+  console.log('------event msg received', time++)
+})
+
+
 
 /**
  * Auto Updater

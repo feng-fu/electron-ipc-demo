@@ -1,4 +1,3 @@
-const { ipcMain } = require('electron')
 const {
   CLIENT_NORMAL_MSG,
   CRAWLER_NORMAL_MSG,
@@ -9,6 +8,12 @@ module.exports = class Ipc {
   constructor(listener, sender) {
     this.listener = listener
     this.sender = sender
+    this.addListener(CLIENT_NORMAL_MSG, this.normalHandle.bind(this))
+    this.addListener(CRAWLER_NORMAL_MSG, this.normalHandle.bind(this))
+  }
+
+  normalHandle() {
+    console.log('event')
   }
 
   addListener(chanel, cb) {
@@ -33,3 +38,5 @@ module.exports = class Ipc {
     })
   }
 }
+
+
